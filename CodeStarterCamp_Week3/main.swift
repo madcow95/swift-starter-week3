@@ -20,16 +20,21 @@ struct Person {
     var gender: Gender = Gender.man
     var MBTI: String = ""
     var age: Int = 0
-    private var currentMoney: Int = 150_000
+    private var currentMoney: Int = 15_000
     
     enum Gender {
         case man
         case woman
     }
     
-    mutating func buyCoffee(menu: Coffee) {
-        print("\(menu.coffeeName)를 구매했습니다!")
-        self.currentMoney -= menu.coffeePrice
+    mutating func order(_ coffee: Coffee, of coffeeShop: CoffeeShop, by name: String) {
+        let currentMoneyAfterOrder = self.currentMoney - coffee.coffeePrice
+        guard currentMoneyAfterOrder > 0 else {
+            print("잔액이 \(-(currentMoneyAfterOrder))원 만큼 부족합니다.")
+            return
+        }
+        coffeeShop.make(coffee: coffee, for: self.name)
+        self.currentMoney = currentMoneyAfterOrder
     }
     
     func selfIntroduce() {
@@ -49,7 +54,7 @@ struct Person {
     }
     
     func showCurrentMoney() {
-        print("현재 잔액: \(self.currentMoney)")
+        print("현재 잔액: \(self.currentMoney)원")
     }
 }
 
@@ -65,6 +70,7 @@ struct Person {
     커피를 만들면 pickUpTable 에 할당할 수 있도록 해봅시다.
  */
 class CoffeeShop {
+    var coffeeShopName: String = ""
     private var totalSales: Int = 0
     private var coffeeMenu: [String: String] = [:]
     private var pickUpTable: [Coffee] = []
@@ -74,9 +80,10 @@ class CoffeeShop {
         self.loadCoffeeMenu()
     }
     
-    func order(coffee menu: Coffee) {
-        self.pickUpTable.append(menu)
-        self.totalSales += menu.coffeePrice
+    func make(coffee: Coffee, for name: String) {
+        self.pickUpTable.append(coffee)
+        print("\(name) 님이 주문하신 \(coffee.coffeeName)(이/가) 준비되었습니다. 픽업대에서 가져가주세요.")
+        self.totalSales += coffee.coffeePrice
     }
     
     private func loadCoffeeMenu() {
@@ -98,7 +105,7 @@ class CoffeeShop {
     }
     
     func showTotalSale() {
-        print(self.totalSales)
+        print("\(self.coffeeShopName)의 총 매출액은 \(self.totalSales)원 입니다.")
     }
 }
 
@@ -148,3 +155,6 @@ let yagombucks = CoffeeShop()
 
 // 6. yagombucks 의 바리스타(barista)를 misterLee 로 할당해봅시다.
 yagombucks.barista = misterLee
+yagombucks.coffeeShopName = "애플커피"
+
+missKim.order(Coffee.americano, of: yagombucks, by: missKim.name)
